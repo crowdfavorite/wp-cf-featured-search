@@ -304,15 +304,15 @@ function cffs_get_featured_search() {
 		$comments_link = ob_get_contents();
 		ob_end_clean();
 		
-		$featured_content = '
+		$featured_content = apply_filters('cffs-get-featured-search', '
 		<div id="cffs-featured-search-'.get_the_ID().'" class="cffs-featured-search">
 			<h3 id="post-'.get_the_ID().'"><a href="'.get_permalink().'" rel="bookmark" title="Permanent Link to '.the_title_attribute(array('echo' => false)).'">'.get_the_title().'</a></h3>
 			<small>'.get_the_time('l, F jS, Y').'</small>
 			<p class="postmetadata">'.get_the_tag_list('Tags: ', ', ', '<br />').' Posted in '.get_the_category_list(', ').' | '.$edit_link.' '.$comments_link.'</p>
 		</div>
-		';
+		', get_the_ID());
 		wp_reset_query();
-		return apply_filters('cffs-get-featured-search', $featured_content, get_the_ID());
+		return $featured_content;
 	}
 	return false;
 }
@@ -331,7 +331,7 @@ function cffs_posts_request($posts_query) {
 			array_push($wp_the_query->query_vars['post__not_in'], $cffs_featured_id);
 			$begin = substr($posts_query, 0, strpos($posts_query, 'ORDER BY'));
 			$end = substr($posts_query, strpos($posts_query, 'ORDER BY'), strlen($posts_query));
-			$posts_query = $begin." AND wp_posts.ID != '$cffs_featured_id'".$end;
+			$posts_query = $begin." AND wp_posts.ID != '$cffs_featured_id' ".$end;
 		}
 	}
 	return $posts_query;
