@@ -285,6 +285,7 @@ function cffs_check_meta($search = '') {
 function cffs_get_featured_search() {
 	global $cffs_featured_id;
 	
+	if ($cffs_featured_id == 0) { return false; } 
 	// Use the Featured ID found in the posts_request function and search for that post/page id to be featured.
 	remove_action('posts_request', 'cffs_posts_request');
 	$featured = new WP_Query(array(
