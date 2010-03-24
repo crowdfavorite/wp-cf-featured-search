@@ -130,13 +130,13 @@ function cffs_admin_css() {
 	.cffs-item-add-button {
 	}
 	.cffs-item-value-input-searching {
-		background:#FFFFFF url(../../wp-admin/images/wpspin_light.gif) no-repeat scroll right center;
+		background:#FFFFFF url("<?php echo ABSPATH; ?>/wp-admin/images/wpspin_light.gif") no-repeat scroll right center;
 	}
 	.cffs-item-value-input-negative {
-		background:#FFFFFF url(../../wp-includes/images/smilies/icon_mrgreen.gif) no-repeat scroll right center;
+		background:#FFFFFF url("<?php echo ABSPATH; ?>/wp-includes/images/smilies/icon_mrgreen.gif") no-repeat scroll right center;
 	}
 	.cffs-item-value-input-positive {
-		background:#FFFFFF url(../../wp-includes/images/smilies/icon_exclaim.gif) no-repeat scroll right center;
+		background:#FFFFFF url("<?php echo ABSPATH; ?>/wp-includes/images/smilies/icon_exclaim.gif") no-repeat scroll right center;
 	}
 	.cffs-notify {
 		background-color:#FFFFE0;
@@ -158,7 +158,6 @@ if (basename($_SERVER['SCRIPT_FILENAME']) == 'post.php' || basename($_SERVER['SC
 	wp_enqueue_script('jquery');
 	wp_enqueue_script('cffs-admin-js', trailingslashit(get_bloginfo('url')).'?cf_action=cffs_admin_js', array('jquery'), CFFS_VERSION);
 	wp_enqueue_style('cffs-admin-css',	trailingslashit(get_bloginfo('url')).'?cf_action=cffs_admin_css', array(), CFFS_VERSION, 'screen');
-	
 	add_action('admin_head', 'cffs_postpage_init');
 }
 
@@ -252,7 +251,9 @@ function cffs_save_meta($post_id, $meta = array()) {
 	$cffs = array();
 	if (is_array($meta) && !empty($meta)) {
 		foreach ($meta as $key => $value) {
-			$cffs[] = strtolower(stripslashes($value));
+			if (cffs_check_meta(strtolower(stripslashes($value))) == 0) {
+				$cffs[] = strtolower(stripslashes($value));
+			}
 		}
 	}
 	update_post_meta($post_id, '_cffs-featured-search', $cffs);
@@ -269,7 +270,7 @@ function cffs_check_meta($search = '') {
 			if (is_array($meta) && !empty($meta)) {
 				foreach ($meta as $key => $value) {
 					if ($value == $search) {
-						return true;
+						return $post_id;
 					}
 				}
 			}
@@ -279,15 +280,62 @@ function cffs_check_meta($search = '') {
 }
 
 
+// Search Functions
 
+function cffs_get_featured_search() {
+	global $cffs_featured_id;
+	
+	// Use the Featured ID found in the posts_request function and search for that post/page id to be featured.
+	remove_action('posts_request', 'cffs_posts_request');
+	$featured = new WP_Query(array(
+		'p' => $cffs_featured_id, 
+		'post_type' => 'any'
+	));
+	add_action('posts_request', 'cffs_posts_request');
+	
+	if ($featured->have_posts()) {
+		$featured->the_post();
+		ob_start();
+		edit_post_link('Edit', '', ' | ');
+		$edit_link = ob_get_contents();
+		ob_end_clean();
+		ob_start();
+		comments_popup_link('No Comments &#187;', '1 Comment &#187;', '% Comments &#187;');
+		$comments_link = ob_get_contents();
+		ob_end_clean();
+		
+		$featured_content = '
+		<div id="cffs-featured-search-'.get_the_ID().'" class="cffs-featured-search">
+			<h3 id="post-'.get_the_ID().'"><a href="'.get_permalink().'" rel="bookmark" title="Permanent Link to '.the_title_attribute(array('echo' => false)).'">'.get_the_title().'</a></h3>
+			<small>'.get_the_time('l, F jS, Y').'</small>
+			<p class="postmetadata">'.get_the_tag_list('Tags: ', ', ', '<br />').' Posted in '.get_the_category_list(', ').' | '.$edit_link.' '.$comments_link.'</p>
+		</div>
+		';
+		wp_reset_query();
+		return apply_filters('cffs-get-featured-search', $featured_content, get_the_ID());
+	}
+	return false;
+}
 
+function cffs_featured_search() {
+	echo apply_filters('cffs-featured-search', cffs_get_featured_search());
+}
 
-
-
-
-
-
-
-
+function cffs_posts_request($posts_query) {
+	global $wp_the_query, $search, $cffs_featured_id;
+	
+	if (is_search()) {
+		$cffs_featured_id = cffs_check_meta($wp_the_query->query_vars['s']);
+		if ($cffs_featured_id != 0) {
+			// Exclude the featured post from the search display
+			array_push($wp_the_query->query_vars['post__not_in'], $cffs_featured_id);
+			$begin = substr($posts_query, 0, strpos($posts_query, 'ORDER BY'));
+			$end = substr($posts_query, strpos($posts_query, 'ORDER BY'), strlen($posts_query));
+			$posts_query = $begin." AND wp_posts.ID != '$cffs_featured_id'".$end;
+		}
+	}
+	return $posts_query;
+}
+add_action('posts_request', 'cffs_posts_request');
 
 ?>

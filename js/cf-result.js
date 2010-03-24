@@ -41,11 +41,11 @@
 					s:s
 				}, function(data) {
 					$input.removeClass(options.searchingClass);
-					if (data == 1) {
-						$input.addClass(options.positiveClass);
+					if (data == 0) {
+						$input.addClass(options.negativeClass);
 					}
 					else {
-						$input.addClass(options.negativeClass);
+						$input.addClass(options.positiveClass);
 					}
 				});
 			}
