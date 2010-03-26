@@ -130,13 +130,13 @@ function cffs_admin_css() {
 	.cffs-item-add-button {
 	}
 	.cffs-item-value-input-searching {
-		background:#FFFFFF url("<?php echo ABSPATH; ?>/wp-admin/images/wpspin_light.gif") no-repeat scroll right center;
+		background:#FFFFFF url("<?php bloginfo('wpurl'); ?>/wp-admin/images/wpspin_light.gif") no-repeat scroll right center;
 	}
 	.cffs-item-value-input-negative {
-		background:#FFFFFF url("<?php echo ABSPATH; ?>/wp-includes/images/smilies/icon_mrgreen.gif") no-repeat scroll right center;
+		background:#FFFFFF url("<?php bloginfo('wpurl'); ?>/wp-includes/images/smilies/icon_mrgreen.gif") no-repeat scroll right center;
 	}
 	.cffs-item-value-input-positive {
-		background:#FFFFFF url("<?php echo ABSPATH; ?>/wp-includes/images/smilies/icon_exclaim.gif") no-repeat scroll right center;
+		background:#FFFFFF url("<?php bloginfo('wpurl'); ?>/wp-includes/images/smilies/icon_exclaim.gif") no-repeat scroll right center;
 	}
 	.cffs-notify {
 		background-color:#FFFFE0;
