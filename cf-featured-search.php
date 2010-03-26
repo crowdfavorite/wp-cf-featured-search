@@ -251,6 +251,7 @@ function cffs_save_meta($post_id, $meta = array()) {
 	$cffs = array();
 	if (is_array($meta) && !empty($meta)) {
 		foreach ($meta as $key => $value) {
+			if (empty($value)) { continue; }
 			$check = cffs_check_meta(strtolower(stripslashes($value)));
 			if ($check == 0 || $check == $post_id) {
 				$cffs[] = strtolower(stripslashes($value));
