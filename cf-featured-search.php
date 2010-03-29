@@ -305,7 +305,7 @@ function cffs_get_featured_search() {
 		$comments_link = ob_get_contents();
 		ob_end_clean();
 		
-		$featured_content = apply_filters('cffs-get-featured-search', '
+		$featured_content = apply_filters('cffs_get_featured_search', '
 		<div id="cffs-featured-search-'.get_the_ID().'" class="cffs-featured-search">
 			<h3 id="post-'.get_the_ID().'"><a href="'.get_permalink().'" rel="bookmark" title="Permanent Link to '.the_title_attribute(array('echo' => false)).'">'.get_the_title().'</a></h3>
 		</div>
@@ -317,7 +317,7 @@ function cffs_get_featured_search() {
 }
 
 function cffs_featured_search() {
-	echo apply_filters('cffs-featured-search', cffs_get_featured_search());
+	echo apply_filters('cffs_featured_search', cffs_get_featured_search());
 }
 
 function cffs_posts_request($posts_query) {
