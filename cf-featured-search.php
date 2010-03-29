@@ -289,12 +289,10 @@ function cffs_get_featured_search() {
 	
 	if ($cffs_featured_id == 0) { return false; } 
 	// Use the Featured ID found in the posts_request function and search for that post/page id to be featured.
-	remove_action('posts_request', 'cffs_posts_request');
 	$featured = new WP_Query(array(
 		'p' => $cffs_featured_id, 
 		'post_type' => 'any'
 	));
-	add_action('posts_request', 'cffs_posts_request');
 	
 	if ($featured->have_posts()) {
 		$featured->the_post();
@@ -310,8 +308,6 @@ function cffs_get_featured_search() {
 		$featured_content = apply_filters('cffs-get-featured-search', '
 		<div id="cffs-featured-search-'.get_the_ID().'" class="cffs-featured-search">
 			<h3 id="post-'.get_the_ID().'"><a href="'.get_permalink().'" rel="bookmark" title="Permanent Link to '.the_title_attribute(array('echo' => false)).'">'.get_the_title().'</a></h3>
-			<small>'.get_the_time('l, F jS, Y').'</small>
-			<p class="postmetadata">'.get_the_tag_list('Tags: ', ', ', '<br />').' Posted in '.get_the_category_list(', ').' | '.$edit_link.' '.$comments_link.'</p>
 		</div>
 		', get_the_ID());
 		wp_reset_query();
@@ -337,6 +333,7 @@ function cffs_posts_request($posts_query) {
 			$posts_query = $begin." AND wp_posts.ID != '$cffs_featured_id' ".$end;
 		}
 	}
+	remove_action('posts_request', 'cffs_posts_request');
 	return $posts_query;
 }
 add_action('posts_request', 'cffs_posts_request');
