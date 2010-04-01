@@ -161,6 +161,171 @@ if (basename($_SERVER['SCRIPT_FILENAME']) == 'post.php' || basename($_SERVER['SC
 	add_action('admin_head', 'cffs_postpage_init');
 }
 
+// Admin Display
+
+function cffs_admin_menu() {
+	add_submenu_page(
+		'edit.php',
+		__('CF Featured Search', 'cffs'),
+		__('CF Featured Search', 'cffs'),
+		10,
+		'cf-featured-search',
+		'cffs_options'
+	);
+}
+add_action('admin_menu', 'cffs_admin_menu');
+
+function cffs_options() {
+	// Alex wants it done this way, there is no worry about this page becoming too big "right now", so no effort has been put into
+	// this page not crashing the server. --SK 3/31/10 6:00 PM
+	global $wpdb;
+	$ids = $wpdb->get_results($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_cffs-featured-search'"));
+	
+	$by_title = array();
+	$by_term = array();
+	
+	if (is_array($ids) && !empty($ids)) {
+		foreach ($ids as $id) {
+			$title = get_the_title($id->post_id);
+			$terms = get_post_meta($id->post_id, '_cffs-featured-search', true);
+			$post_edit_link = get_edit_post_link($id->post_id, 'not_display');
+			$display_link = get_permalink($id->post_id);
+			
+			if (is_array($terms) && !empty($terms)) {
+				$by_title[sanitize_title($title)] = array(
+					'id' => $id->post_id,
+					'title' => $title,
+					'terms' => $terms,
+					'post_edit_link' => $post_edit_link,
+					'display_link' => $display_link
+				);
+
+				foreach ($terms as $term) {
+					if (empty($by_term[$term])) {
+						$by_term[$term] = array(
+							'term' => $term,
+							'title' => $title,
+							'post_edit_link' => $post_edit_link,
+							'display_link' => $display_link
+						);
+					}
+				}
+				ksort($by_title);
+				ksort($by_term);
+			}
+		}
+	}
+	?>
+	<div class="wrap">
+		<?php echo screen_icon().'<h2>'.__('CF Featured Search Terms', 'cffs').'</h2>'; ?>
+		<p>
+			<?php _e('This page displays all of the Featured Search terms for all of the posts/pages.', 'cffs'); ?>
+		</p>
+		<?php if (is_array($by_title) && !empty($by_title)) { ?>
+		<div class="cffs-sort-by-title" style="float:left; width:45%; padding:20px;">
+		<h3><?php _e('Terms By Title', 'cffs'); ?></h3>
+		<table class="widefat">
+			<thead>
+				<tr>
+					<th style="width:25%;">
+						<?php _e('Post Title', 'cffs'); ?>
+					</th>
+					<th>
+						<?php _e('Terms', 'cffs'); ?>
+					</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th style="width:25%;">
+						<?php _e('Post Title', 'cffs'); ?>
+					</th>
+					<th>
+						<?php _e('Terms', 'cffs'); ?>
+					</th>
+				</tr>
+			</tfoot>
+			<tbody>
+				<?php
+				foreach ($by_title as $key => $data) {
+					?>
+					<tr>
+						<td>
+							<?php echo $data['title']; ?> | <a href="<?php echo $data['post_edit_link']; ?>"><?php _e('Edit', 'cffs'); ?></a> | <a href="<?php echo $data['display_link']; ?>"><?php _e('View', 'cffs'); ?></a>
+						</td>
+						<td>
+							<?php
+							if (is_array($data['terms']) && !empty($data['terms'])) {
+								$count = 0;
+								foreach ($data['terms'] as $term) {
+									$count++;
+									echo $term;
+									if ($count < count($data['terms'])) {
+										echo '<br />';
+									}
+								}
+							}
+							else {
+								echo $data['terms'];
+							}
+							?>
+						</td>
+					</tr>
+					<?php
+				}
+				?>
+			</tbody>
+		</table>
+		</div>
+		<?php } ?>
+		<?php if (is_array($by_term) && !empty($by_term)) { ?>
+		<div class="cffs-sort-by-term" style="float:left; width:45%; padding:20px;">
+		<h3><?php _e('Terms By Term', 'cffs'); ?></h3>
+		<table class="widefat">
+			<thead>
+				<tr>
+					<th style="width:25%;">
+						<?php _e('Term', 'cffs'); ?>
+					</th>
+					<th>
+						<?php _e('Post Title', 'cffs'); ?>
+					</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th style="width:25%;">
+						<?php _e('Term', 'cffs'); ?>
+					</th>
+					<th>
+						<?php _e('Post Title', 'cffs'); ?>
+					</th>
+				</tr>
+			</tfoot>
+			<tbody>
+				<?php
+				foreach ($by_term as $key => $data) {
+					?>
+					<tr>
+						<td>
+							<?php echo $data['term']; ?>
+						</td>
+						<td>
+							<?php echo $data['title']; ?> | <a href="<?php echo $data['post_edit_link']; ?>"><?php _e('Edit', 'cffs'); ?></a> | <a href="<?php echo $data['display_link']; ?>"><?php _e('View', 'cffs'); ?></a>
+						</td>
+					</tr>
+					<?php
+				}
+				?>
+			</tbody>
+		</table>
+		</div>
+		<?php } ?>		
+		<div class="clear"></div>
+	</div>
+	<?php
+}
+
 // Post/Page Functions
 
 function cffs_postpage_init() {
