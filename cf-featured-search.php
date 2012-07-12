@@ -339,8 +339,9 @@ function cffs_options() {
 // Post/Page Functions
 
 function cffs_postpage_init() {
-	add_meta_box('cffs', __('CF Featured Search', 'cffs'), 'cffs_postpage_box', 'post', 'advanced', 'high');
-	add_meta_box('cffs', __('CF Featured Search', 'cffs'), 'cffs_postpage_box', 'page', 'advanced', 'high');
+	foreach (cffs_get_enabled_post_types() as $post_type) {
+		add_meta_box('cffs', __('CF Featured Search', 'cffs'), 'cffs_postpage_box', $post_type, 'advanced', 'high');
+	}
 }
 add_action('admin_head', 'cffs_postpage_init');
 
@@ -405,17 +406,16 @@ function cffs_postpage_box() {
 	<?php
 }
 
+/* Allow multiple post types to have a featured search term */
+function cffs_get_enabled_post_types() {
+	return (array) apply_filters('cffs_post_types', array('post', 'page'));
+}
+
 function cffs_save_post($post_id, $post) {
 	if (!empty($_POST['cffs-active']) && $_POST['cffs-active'] == 'yes') {
-		switch ($post->post_type) {
-			case 'revision':
-				return;
-				break;
-			case 'page':
-			case 'post':
-				unset($_POST['cffs']['###CFFS###']);
-				cffs_save_meta($post_id, $_POST['cffs']);
-				break;
+		if (in_array($post->post_type, cffs_get_enabled_post_types())){
+			unset($_POST['cffs']['###CFFS###']);
+			cffs_save_meta($post_id, $_POST['cffs']);
 		}
 	}
 }
