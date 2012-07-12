@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: CF Featured Search
-Plugin URI: http://crowdfavorite.com 
+Plugin URI: http://crowdfavorite.com
 Description: Featured Search
-Version: 1.0.1
+Version: 1.0.2
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -11,7 +11,7 @@ Author URI: http://crowdfavorite.com
 // ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
 
 // Constants
-define('CFFS_VERSION', '1.0.1');
+define('CFFS_VERSION', '1.0.2');
 define('CFFS_DIR',trailingslashit(realpath(dirname(__FILE__))));
 
 if (!defined('PLUGINDIR')) {
@@ -154,12 +154,22 @@ function cffs_admin_css() {
 }
 
 // Add the CSS and JS to the proper places in the WP Admin
-if (basename($_SERVER['SCRIPT_FILENAME']) == 'post.php' || basename($_SERVER['SCRIPT_FILENAME']) == 'page.php' || basename($_SERVER['SCRIPT_FILENAME']) == 'post-new.php' || basename($_SERVER['SCRIPT_FILENAME']) == 'page-new.php') {
-	wp_enqueue_script('jquery');
-	wp_enqueue_script('cffs-admin-js', trailingslashit(get_bloginfo('url')).'?cf_action=cffs_admin_js', array('jquery'), CFFS_VERSION);
-	wp_enqueue_style('cffs-admin-css',	trailingslashit(get_bloginfo('url')).'?cf_action=cffs_admin_css', array(), CFFS_VERSION, 'screen');
-	add_action('admin_head', 'cffs_postpage_init');
+function cffs_enqueue_scripts($hook_suffix) {
+	$ones_were_looking_for = array(
+		'post.php',
+		'page.php',
+		'post-new.php',
+		'page-new.php',
+	);
+	if (in_array($hook_suffix, $ones_were_looking_for)) {
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('cffs-admin-js', trailingslashit(get_bloginfo('url')).'?cf_action=cffs_admin_js', array('jquery'), CFFS_VERSION);
+		wp_enqueue_style('cffs-admin-css',	trailingslashit(get_bloginfo('url')).'?cf_action=cffs_admin_css', array(), CFFS_VERSION, 'screen');
+	}
 }
+add_action('admin_enqueue_scripts', 'cffs_enqueue_scripts');
+
+
 
 // Admin Display
 
@@ -180,17 +190,17 @@ function cffs_options() {
 	// this page not crashing the server. --SK 3/31/10 6:00 PM
 	global $wpdb;
 	$ids = $wpdb->get_results($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_cffs-featured-search'"));
-	
+
 	$by_title = array();
 	$by_term = array();
-	
+
 	if (is_array($ids) && !empty($ids)) {
 		foreach ($ids as $id) {
 			$title = get_the_title($id->post_id);
 			$terms = get_post_meta($id->post_id, '_cffs-featured-search', true);
 			$post_edit_link = get_edit_post_link($id->post_id, 'not_display');
 			$display_link = get_permalink($id->post_id);
-			
+
 			if (is_array($terms) && !empty($terms)) {
 				$by_title[sanitize_title($title)] = array(
 					'id' => $id->post_id,
@@ -320,7 +330,7 @@ function cffs_options() {
 			</tbody>
 		</table>
 		</div>
-		<?php } ?>		
+		<?php } ?>
 		<div class="clear"></div>
 	</div>
 	<?php
@@ -329,9 +339,11 @@ function cffs_options() {
 // Post/Page Functions
 
 function cffs_postpage_init() {
-	add_meta_box('cffs', __('CF Featured Search', 'cffs'), 'cffs_postpage_box', 'post', 'advanced', 'high');
-	add_meta_box('cffs', __('CF Featured Search', 'cffs'), 'cffs_postpage_box', 'page', 'advanced', 'high');
+	foreach (cffs_get_enabled_post_types() as $post_type) {
+		add_meta_box('cffs', __('CF Featured Search', 'cffs'), 'cffs_postpage_box', $post_type, 'advanced', 'high');
+	}
 }
+add_action('admin_head', 'cffs_postpage_init');
 
 function cffs_postpage_box() {
 	global $post;
@@ -394,17 +406,16 @@ function cffs_postpage_box() {
 	<?php
 }
 
+/* Allow multiple post types to have a featured search term */
+function cffs_get_enabled_post_types() {
+	return (array) apply_filters('cffs_post_types', array('post', 'page'));
+}
+
 function cffs_save_post($post_id, $post) {
 	if (!empty($_POST['cffs-active']) && $_POST['cffs-active'] == 'yes') {
-		switch ($post->post_type) {
-			case 'revision':
-				return;
-				break;
-			case 'page':
-			case 'post':
-				unset($_POST['cffs']['###CFFS###']);
-				cffs_save_meta($post_id, $_POST['cffs']);
-				break;
+		if (in_array($post->post_type, cffs_get_enabled_post_types())){
+			unset($_POST['cffs']['###CFFS###']);
+			cffs_save_meta($post_id, $_POST['cffs']);
 		}
 	}
 }
@@ -412,7 +423,7 @@ add_action('save_post', 'cffs_save_post', 10, 2);
 
 function cffs_save_meta($post_id, $meta = array()) {
 	if (empty($post_id) || $post_id == 0) { return; }
-	
+
 	$cffs = array();
 	if (is_array($meta) && !empty($meta)) {
 		foreach ($meta as $key => $value) {
@@ -451,14 +462,14 @@ function cffs_check_meta($search = '') {
 
 function cffs_get_featured_search() {
 	global $cffs_featured_id;
-	
-	if ($cffs_featured_id == 0) { return false; } 
+
+	if ($cffs_featured_id == 0) { return false; }
 	// Use the Featured ID found in the posts_request function and search for that post/page id to be featured.
 	$featured = new WP_Query(array(
-		'p' => $cffs_featured_id, 
+		'p' => $cffs_featured_id,
 		'post_type' => 'any'
 	));
-	
+
 	if ($featured->have_posts()) {
 		$featured->the_post();
 		ob_start();
@@ -469,7 +480,7 @@ function cffs_get_featured_search() {
 		comments_popup_link('No Comments &#187;', '1 Comment &#187;', '% Comments &#187;');
 		$comments_link = ob_get_contents();
 		ob_end_clean();
-		
+
 		$featured_content = apply_filters('cffs_get_featured_search', '
 		<div id="cffs-featured-search-'.get_the_ID().'" class="cffs-featured-search">
 			<h3 id="post-'.get_the_ID().'"><a href="'.get_permalink().'" rel="bookmark" title="Permanent Link to '.the_title_attribute(array('echo' => false)).'">'.get_the_title().'</a></h3>
@@ -487,7 +498,7 @@ function cffs_featured_search() {
 
 function cffs_posts_request($posts_query) {
 	global $wp_the_query, $search, $cffs_featured_id;
-	
+
 	if (is_search()) {
 		$cffs_featured_id = cffs_check_meta(str_replace('+', ' ', $wp_the_query->query_vars['s']));
 		if ($cffs_featured_id != 0) {

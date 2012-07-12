@@ -1,0 +1,14 @@
+# CF Featured Search
+
+## 1.0.2
+
+- Enabling Featured Search meta box on filtered list of post types
+- Updating action when enqueueing scripts till admin_enqueue_scripts
+
+## 1.0.1
+
+- Fix Issue: Reset postdata, not query, so as to not clobber custom queries
+
+## 1.0
+
+- Initial Release
