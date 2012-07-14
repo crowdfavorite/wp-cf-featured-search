@@ -1,5 +1,9 @@
 # CF Featured Search
 
+## 1.0.3
+
+- Switch to capability rather than user level for WP3.4 compatibility
+
 ## 1.0.2
 
 - Enabling Featured Search meta box on filtered list of post types
