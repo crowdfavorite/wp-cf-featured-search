@@ -3,7 +3,7 @@
 Plugin Name: CF Featured Search
 Plugin URI: http://crowdfavorite.com
 Description: Featured Search
-Version: 1.0.3
+Version: 1.0.4
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -11,7 +11,7 @@ Author URI: http://crowdfavorite.com
 // ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
 
 // Constants
-define('CFFS_VERSION', '1.0.3');
+define('CFFS_VERSION', '1.0.4');
 define('CFFS_DIR',trailingslashit(realpath(dirname(__FILE__))));
 
 if (!defined('PLUGINDIR')) {
@@ -500,7 +500,7 @@ function cffs_posts_request($posts_query) {
 	global $wp_the_query, $search, $cffs_featured_id;
 
 	if (is_search()) {
-		$cffs_featured_id = cffs_check_meta(str_replace('+', ' ', $wp_the_query->query_vars['s']));
+		$cffs_featured_id = cffs_check_meta(str_replace('+', ' ', $wp_the_query->get('s')));
 		if ($cffs_featured_id != 0) {
 			// Exclude the featured post from the search display
 			array_push($wp_the_query->query_vars['post__not_in'], $cffs_featured_id);
