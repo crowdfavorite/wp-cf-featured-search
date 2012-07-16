@@ -3,7 +3,7 @@
 Plugin Name: CF Featured Search
 Plugin URI: http://crowdfavorite.com
 Description: Featured Search
-Version: 1.0.3
+Version: 1.0.4
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -11,7 +11,7 @@ Author URI: http://crowdfavorite.com
 // ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
 
 // Constants
-define('CFFS_VERSION', '1.0.3');
+define('CFFS_VERSION', '1.0.4');
 define('CFFS_DIR',trailingslashit(realpath(dirname(__FILE__))));
 
 if (!defined('PLUGINDIR')) {
