@@ -500,7 +500,7 @@ function cffs_posts_request($posts_query) {
 	global $wp_the_query, $search, $cffs_featured_id;
 
 	if (is_search()) {
-		$cffs_featured_id = cffs_check_meta(str_replace('+', ' ', $wp_the_query->query_vars['s']));
+		$cffs_featured_id = cffs_check_meta(str_replace('+', ' ', $wp_the_query->get('s')));
 		if ($cffs_featured_id != 0) {
 			// Exclude the featured post from the search display
 			array_push($wp_the_query->query_vars['post__not_in'], $cffs_featured_id);
