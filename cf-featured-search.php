@@ -3,7 +3,7 @@
 Plugin Name: CF Featured Search
 Plugin URI: http://crowdfavorite.com
 Description: Featured Search
-Version: 1.0.4
+Version: 1.0.5
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -11,7 +11,7 @@ Author URI: http://crowdfavorite.com
 // ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
 
 // Constants
-define('CFFS_VERSION', '1.0.4');
+define('CFFS_VERSION', '1.0.5');
 define('CFFS_DIR',trailingslashit(realpath(dirname(__FILE__))));
 
 if (!defined('PLUGINDIR')) {
@@ -439,8 +439,13 @@ function cffs_save_meta($post_id, $meta = array()) {
 
 function cffs_check_meta($search = '') {
 	global $wpdb;
-	$search = $wpdb->escape(strtolower(trim($search)));
-	$results = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE 1 AND meta_key = '_cffs-featured-search' AND meta_value LIKE '%".$search."%'");
+	$search = strtolower(trim($search));
+	$results = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM $wpdb->postmeta WHERE 1 AND meta_key = '_cffs-featured-search' AND meta_value LIKE '%%%s%%'",
+			$search
+		)
+	);
 	if (is_array($results) && !empty($results)) {
 		foreach ($results as $result) {
 			$post_id = $result->post_id;
