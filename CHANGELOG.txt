@@ -1,5 +1,9 @@
 # CF Featured Search
 
+## 1.0.5
+
+- Fixed: deprecated warning about wpdb::escape();
+
 ## 1.0.4
 
 - Using "getter" function for query vars against the WP_Query object.  This stops a PHP Notice if the 's' query var wasn't set.
