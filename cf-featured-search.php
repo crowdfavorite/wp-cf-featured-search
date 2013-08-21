@@ -439,8 +439,13 @@ function cffs_save_meta($post_id, $meta = array()) {
 
 function cffs_check_meta($search = '') {
 	global $wpdb;
-	$search = $wpdb->escape(strtolower(trim($search)));
-	$results = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE 1 AND meta_key = '_cffs-featured-search' AND meta_value LIKE '%".$search."%'");
+	$search = strtolower(trim($search));
+	$results = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM $wpdb->postmeta WHERE 1 AND meta_key = '_cffs-featured-search' AND meta_value LIKE '%%%s%%'",
+			$search
+		)
+	);
 	if (is_array($results) && !empty($results)) {
 		foreach ($results as $result) {
 			$post_id = $result->post_id;
