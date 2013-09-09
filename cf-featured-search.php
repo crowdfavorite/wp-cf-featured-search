@@ -477,20 +477,13 @@ function cffs_get_featured_search() {
 
 	if ($featured->have_posts()) {
 		$featured->the_post();
-		ob_start();
-		edit_post_link('Edit', '', ' | ');
-		$edit_link = ob_get_contents();
-		ob_end_clean();
-		ob_start();
-		comments_popup_link('No Comments &#187;', '1 Comment &#187;', '% Comments &#187;');
-		$comments_link = ob_get_contents();
-		ob_end_clean();
 
 		$featured_content = apply_filters('cffs_get_featured_search', '
 		<div id="cffs-featured-search-'.get_the_ID().'" class="cffs-featured-search">
 			<h3 id="post-'.get_the_ID().'"><a href="'.get_permalink().'" rel="bookmark" title="Permanent Link to '.the_title_attribute(array('echo' => false)).'">'.get_the_title().'</a></h3>
 		</div>
 		', get_the_ID());
+
 		wp_reset_postdata();
 		return $featured_content;
 	}
