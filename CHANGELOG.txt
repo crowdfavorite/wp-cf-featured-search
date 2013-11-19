@@ -1,5 +1,9 @@
 # CF Featured Search
 
+## develop
+
+- Fixed: https admin could nevertheless enqueue http js and css
+
 ## 1.0.5
 
 - Fixed: deprecated warning about wpdb::escape();
