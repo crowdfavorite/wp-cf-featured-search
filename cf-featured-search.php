@@ -3,7 +3,7 @@
 Plugin Name: CF Featured Search
 Plugin URI: http://crowdfavorite.com
 Description: Featured Search
-Version: 1.0.5
+Version: 1.0.6
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -472,7 +472,8 @@ function cffs_get_featured_search() {
 	// Use the Featured ID found in the posts_request function and search for that post/page id to be featured.
 	$featured = new WP_Query(array(
 		'p' => $cffs_featured_id,
-		'post_type' => 'any'
+		'post_type' => 'any',
+		'post_status' =>  array('publish', 'inherit')
 	));
 
 	if ($featured->have_posts()) {
