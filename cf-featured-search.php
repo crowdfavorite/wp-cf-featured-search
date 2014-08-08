@@ -473,7 +473,7 @@ function cffs_get_featured_search() {
 	$featured = new WP_Query(array(
 		'p' => $cffs_featured_id,
 		'post_type' => 'any',
-		'post_status' => 'publish'
+		'post_status' =>  array('publish', 'inherit')
 	));
 
 	if ($featured->have_posts()) {
