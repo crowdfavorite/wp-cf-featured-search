@@ -1,5 +1,9 @@
 # CF Featured Search
 
+## 1.0.6
+
+- Fixed: only query for published posts
+
 ## 1.0.5
 
 - Fixed: deprecated warning about wpdb::escape();
